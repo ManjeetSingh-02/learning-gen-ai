@@ -53,7 +53,7 @@ async function main(prompt) {
     });
 
     const rawResult = result.choices[0].message.content;
-    const parsedResult = JSON.parse(raw);
+    const parsedResult = JSON.parse(rawResult);
 
     MESSAGES_DB.push({
       role: 'assistant',
