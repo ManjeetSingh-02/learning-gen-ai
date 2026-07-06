@@ -4,7 +4,8 @@ import { exec } from 'child_process';
 
 // OpenAI client initialization
 const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: '',
+  baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
 });
 
 // System prompt for the AI model
@@ -68,7 +69,7 @@ async function main(prompt) {
   while (true) {
     // Call the OpenAI API to get the model's response based on the conversation history
     const result = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gemini-2.5-flash',
       messages: MESSAGES_DB,
     });
 

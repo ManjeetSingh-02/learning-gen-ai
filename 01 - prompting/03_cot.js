@@ -1,7 +1,8 @@
 import { OpenAI } from 'openai';
 
 const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: '',
+  baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
 });
 
 const SYSTEM_PROMPT = `You are an expert AI Engineer. You have to analyze user's input carefully and then breakdown the problem into multiple sub-problems before providing final answer. Always breakdown the user's intention and how to solve that problem, then solve it step by step.
@@ -47,7 +48,7 @@ async function main(prompt) {
 
   while (true) {
     const result = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gemini-2.5-flash',
       messages: MESSAGES_DB,
     });
 
