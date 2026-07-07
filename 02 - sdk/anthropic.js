@@ -33,3 +33,15 @@ async function init() {
 await init();
 
 console.log('Anthropic SDK initialized successfully');
+
+async function stream() {
+  await client.messages
+    .stream({
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: 'Tell me a story about robin hood' }],
+      model: 'claude-opus-4-8',
+    })
+    .on(text => process.stdout.write(text));
+}
+
+await stream();

@@ -30,3 +30,18 @@ async function init() {
 await init();
 
 console.log('Gemini SDK initialized successfully');
+
+async function stream() {
+  const interaction = await client.interactions.create({
+    model: 'gemini-3.5-flash',
+    input: 'Tell me a story about robin hood',
+    stream: true,
+  });
+
+  for await (const event of interaction) {
+    if (event.event_type === 'step.delta' && event.delta.type === 'text')
+      process.stdout.write(event.delta.text);
+  }
+}
+
+await stream();

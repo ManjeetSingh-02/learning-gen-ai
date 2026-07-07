@@ -28,3 +28,17 @@ async function init() {
 await init();
 
 console.log('OpenAI SDK initialized successfully');
+
+async function stream() {
+  const result = await client.responses.create({
+    model: 'gpt-4.1-mini',
+    input: 'Tell me a story about robin hood',
+    stream: true,
+  });
+
+  for await (const event of result) {
+    process.stdout.write(event);
+  }
+}
+
+await stream();
