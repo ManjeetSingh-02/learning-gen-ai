@@ -41,11 +41,18 @@ async function indexing(files) {
 }
 
 async function querying(query) {
-  // query the vector store for relevant documents based on the user query
-  const results = await vectorRetriever.invoke(query);
+  // call the OpenAI API with the system prompt and query to get enhanced query
+  const enhancedQuery = await openAIClient.responses.create({
+    model: 'gpt-4.1-mini',
+    instructions: `You are expert in understanding what user is asking. Simple enhance the user query with more context and detalils. Don't answer the query, just enhance it and return output in text format.`,
+    input: query,
+  });
+
+  // query the vector store for relevant documents based on the enhanced query
+  const results = await vectorRetriever.invoke(enhancedQuery.output_text);
 
   // system prompt with the relevant documents
-  const SYSTEM_PROMPT = `You are expert in answering user based query on the provided context about the documents. Don't answer anything outside the context of the documents. Always answer in short and also provide page number of the content and name of the book. If you don't know the answer, just say "I don't know". Don't try to make up an answer.
+  const SYSTEM_PROMPT = `You are expert in answering user based query on the provided context about the documents. Don't answer anything outside the context of the documents. You will be provided with the relevant documents. Use the relevant documents to answer the user query. If you don't find any relevant information in the documents, just say "I don't know". Don't try to make up an answer. Always provide the page number of the content and name of the book in your answer.
   User Documents:
     ${results
       .map((d, i) =>
@@ -57,11 +64,11 @@ async function querying(query) {
       )
       .join('\n\n')}`;
 
-  // call the OpenAI API with the system prompt and user query to get a response
+  // call the OpenAI API with the system prompt and enhanced query to get a response
   const response = await openAIClient.responses.create({
     model: 'gpt-4.1-mini',
     instructions: SYSTEM_PROMPT,
-    input: query,
+    input: enhancedQuery.output_text,
   });
 
   // log the response from the OpenAI API
