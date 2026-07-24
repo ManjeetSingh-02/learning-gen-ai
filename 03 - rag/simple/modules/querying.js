@@ -32,12 +32,15 @@ export async function querying(query) {
       .join('\n\n')}`;
 
   // call the OpenAI API with the system prompt and enhanced query to get a response
-  const response = await openai.responses.create({
+  const stream = await openai.responses.create({
     model: 'gpt-4.1-mini',
     instructions: SYSTEM_PROMPT,
     input: enhancedQuery.output_text,
+    stream: true,
   });
 
-  // log the response from the OpenAI API
-  console.log(response.output_text);
+  // stream the response from the OpenAI API
+  for await (const event of stream) {
+    if (event.type === 'response.output_text.delta') process.stdout.write(event.delta);
+  }
 }
