@@ -1,0 +1,23 @@
+{
+  "name": "page-index",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js"
+  },
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.11.0",
+      "onFail": "download"
+    }
+  },
+  "type": "module",
+  "dependencies": {
+    "@pageindex/sdk": "^0.8.0",
+    "dotenv": "^17.4.2",
+    "mongoose": "^9.9.1",
+    "openai": "^7.4.0"
+  }
+}
