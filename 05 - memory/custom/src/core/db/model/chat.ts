@@ -2,7 +2,7 @@
 import mongoose from 'mongoose';
 
 const chatSchema = new mongoose.Schema(
-  { ltm: { type: [String], default: [] } },
+  { userID: { type: String, required: true } },
   { timestamps: true }
 );
 
