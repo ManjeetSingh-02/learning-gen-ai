@@ -1,10 +1,10 @@
 // internal-imports
-import { openai } from '../../core/lib/openai.js';
-import { Chat } from '../../core/db/model/chat.js';
-import { LTM } from '../../core/db/model/ltm.js';
-import { Message } from '../../core/db/model/message.js';
-import { Role } from '../../core/config/role.js';
 import { SP } from '../../core/config/prompt.js';
+import { Role } from '../../core/config/role.js';
+import { Chat } from '../../core/db/mongoose/model/chat.js';
+import { LTM } from '../../core/db/mongoose/model/ltm.js';
+import { Message } from '../../core/db/mongoose/model/message.js';
+import { openai } from '../../core/lib/openai.js';
 
 // external-imports
 import type { Request, Response } from 'express';

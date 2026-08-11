@@ -1,6 +1,6 @@
 // internal-imports
 import { createApp } from './app/express.js';
-import { connectToDatabase } from './core/db/connect.js';
+import { connectToDatabase } from './core/db/mongoose/connect.js';
 
 // external-imports
 import http from 'http';
