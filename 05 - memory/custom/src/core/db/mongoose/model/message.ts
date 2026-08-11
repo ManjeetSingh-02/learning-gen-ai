@@ -1,5 +1,5 @@
 // internal-imports
-import { Role } from '../../config/role.js';
+import { Role } from '../../../config/role.js';
 
 // external-imports
 import mongoose from 'mongoose';
