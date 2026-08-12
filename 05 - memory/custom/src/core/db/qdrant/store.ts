@@ -5,7 +5,7 @@ import { QdrantVectorStore } from '@langchain/qdrant';
 // type for the memory response
 type MemoryResponse = {
   episodes: { content: string }[];
-  facts: { action: 'create' | 'update'; id: string; content: string }[];
+  facts: { action: 'create' | 'update' | 'delete'; id: string; content: string }[];
 };
 
 // create a Qdrant vector store and add the embeddings to it
@@ -27,8 +27,8 @@ export async function retrieveDocs(query: string, userID: string) {
 
 // function to store docs in the vector store
 export async function storeDocs(memory: MemoryResponse, userID: string) {
-  // delete old Qdrant points for updated facts
-  for (const f of memory.facts.filter(f => f.action === 'update')) {
+  // delete old Qdrant points for the facts that have been updated or deleted
+  for (const f of memory.facts.filter(f => f.action === 'update' || f.action === 'delete')) {
     await vectorStore.client.delete('custom-memory', { wait: true, points: [f.id] });
   }
 
