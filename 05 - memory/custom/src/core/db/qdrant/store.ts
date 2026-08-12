@@ -34,10 +34,12 @@ export async function storeDocs(memory: MemoryResponse, userID: string) {
 
   // prepare new memories
   const newMemories = [
-    ...memory.facts.map(f => ({
-      pageContent: f.content,
-      metadata: { type: 'fact', userID },
-    })),
+    ...memory.facts
+      .filter(f => f.action === 'create' || f.action === 'update')
+      .map(f => ({
+        pageContent: f.content,
+        metadata: { type: 'fact', userID },
+      })),
     ...memory.episodes.map(e => ({
       pageContent: e.content,
       metadata: { type: 'episode', userID },
