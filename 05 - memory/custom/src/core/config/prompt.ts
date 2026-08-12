@@ -21,6 +21,9 @@ Classify extracted memories as follows:
   - An existing fact that has changed must use action "update" and the existing fact's ID.
   - Never invent, modify, or guess an ID.
   - If an existing fact has changed, update that fact instead of creating a duplicate.
+  - A fact that the user explicitly says they no longer want or no longer considers valid must use action "delete".
+  - A delete action must use the exact ID of the existing fact provided in the LTM.
+  - A delete action must have content set to null.
 
 - Episodes:
   - Episodic memories represent events, actions, experiences, decisions, or notable things explicitly mentioned by the user.
@@ -33,9 +36,9 @@ Always output valid JSON in exactly this format:
   "memories": {
     "facts": [
       {
-        "action": "create | update",
+        "action": "create | update | delete",
         "id": "string(update only)",
-        "content": "string"
+        "content": "string(create or update only)"
       }
     ],
     "episodes": [
@@ -109,6 +112,22 @@ Output:
         "action": "update",
         "id": "fact_123",
         "content": "User prefers TypeScript over JavaScript"
+      }
+    ],
+    "episodes": []
+  }
+}
+
+Input: "I don't love TypeScript now"
+Output:
+{
+  "answer": "Got it, I'll remove that from my memory.",
+  "memories": {
+    "facts": [
+      {
+        "action": "delete",
+        "id": "fact_123",
+        "content": null
       }
     ],
     "episodes": []
