@@ -26,7 +26,7 @@ export async function retrieveDocs(query: string, userID: string) {
 }
 
 // function to store docs in the vector store
-export async function storeDocs(memory: MemoryResponse, userID: string): Promise<void> {
+export async function storeDocs(memory: MemoryResponse, userID: string) {
   // delete old Qdrant points for updated facts
   for (const f of memory.facts.filter(f => f.action === 'update')) {
     await vectorStore.client.delete('custom-memory', { wait: true, points: [f.id] });
