@@ -3,7 +3,7 @@ import { SP } from '../../core/config/prompt.js';
 import { Role } from '../../core/config/role.js';
 import { Chat } from '../../core/db/mongoose/model/chat.js';
 import { Message } from '../../core/db/mongoose/model/message.js';
-import { vectorStore } from '../../core/db/qdrant/store.js';
+import { retrieveDocs, storeDocs } from '../../core/db/qdrant/store.js';
 import { openai } from '../../core/lib/openai.js';
 
 // external-imports
@@ -22,8 +22,8 @@ export const controller = {
       .select('_id')
       .lean();
 
-    // get the last 3 relevant facts from the ltm in vector store
-    const ltm = await vectorStore.similaritySearch(request.body.query, 3);
+    // retrieve the relevant long-term memories from the vector store
+    const ltm = await retrieveDocs(request.body.query, request.body.userID);
 
     // get the last 20 messages of the chat from db
     const stm = await Message.find({ chatID: chat._id })
@@ -47,7 +47,7 @@ export const controller = {
       model: 'gpt-4.1-mini',
       instructions: `${SP}\n
       STM: ${JSON.stringify(stm.map(m => ({ role: m.role, content: m.content })))}\n
-      LTM: ${JSON.stringify(ltm.map(f => f.pageContent))}`,
+      LTM: ${JSON.stringify(ltm)}`,
       input: request.body.query,
     });
 
@@ -61,14 +61,8 @@ export const controller = {
       role: Role.ASSISTANT,
     });
 
-    // update the ltm in vector store and db if the LLM has provided new information
-    if (parsedRes.ltm)
-      await vectorStore.addDocuments([
-        {
-          metadata: { userID: request.body.userID },
-          pageContent: parsedRes.ltm,
-        },
-      ]);
+    // store the new memories in the vector store
+    if (parsedRes.memories) await storeDocs(parsedRes.memories, request.body.userID);
 
     // return the response to the client
     return response.status(200).json({
