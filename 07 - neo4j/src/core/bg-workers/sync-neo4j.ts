@@ -1,18 +1,43 @@
 // internal-imports
-import { getRedisKV, zrangebyscoreRedisSortedSet } from '../lib/redis.js';
+import { getRedisKV, setRedisKV, zrangebyscoreRedisSortedSet } from '../lib/redis.js';
 import { runBackgroundNeo4jAgent } from './helper.js';
 
-export async function runNeo4jSyncWorker() {
-  // get chat running context and history
-  const context = await getRedisKV('chat-running-context');
-  const history = (
-    await zrangebyscoreRedisSortedSet('chat-history', Date.now() - 60000, '+inf')
-  ).map(c => JSON.parse(c));
+// function to start the neo4j sync worker
+export function startNeo4jSyncWorker() {
+  let isSyncing = false;
 
+  setInterval(async () => {
+    if (isSyncing) return;
+    isSyncing = true;
+
+    try {
+      await runNeo4jSyncWorker();
+    } catch (error) {
+      console.error('Neo4j sync worker failed:', error);
+    } finally {
+      isSyncing = false;
+    }
+  }, 60000);
+}
+
+// function to run the neo4j sync worker
+async function runNeo4jSyncWorker() {
+  // get chat running context, last processed timestamp and history
+  const context = await getRedisKV('chat-running-context');
+  const timestamp = Number(await getRedisKV('chat-last-processed-timestamp')) || 0;
+  const history = await zrangebyscoreRedisSortedSet('chat-history', `(${timestamp}`, '+inf');
+
+  // if there is no new chat history, return
+  if (history.length === 0) return;
+
+  // run background neo4j agent to process the chat history and sync with neo4j
   await runBackgroundNeo4jAgent({
-    chatHistory: history,
+    chatHistory: history.map(c => JSON.parse(c.value!)),
     systemPrompt: `${SYSTEM_PROMPT}\nRunning Context:${context}`,
   });
+
+  // update the last processed timestamp in redis
+  await setRedisKV('chat-last-processed-timestamp', Math.max(...history.map(c => c.score)));
 }
 
 // system prompt for the LLM
@@ -55,32 +80,22 @@ Now you will perform all the pipeline steps
   }
 - {
     "step": "THINK",
-    "output": "Considering the running context and chat history, it seems that the user has a preference for Pizza Hut. First i have to query to check if there are any existing nodes for the user and Pizza Hut in the Neo4j database. If they do not exist, I will create them and then establish a relationship between the user and Pizza Hut."
+    "output": "Considering the running context and chat history, it seems that the user has a preference for Pizza Hut. First i have to query to check if there are any existing nodes for the user. If they do not exist, I will create them."
   }
 - {
     "step": "TOOL_REQUEST",
-    "query": <ypher_query_to_check_existing nodes>,
-    "output": "Generated a Cypher query to check for existing nodes for the user and Pizza Hut in the Neo4j database."
+    "query": <cypher_query_to_check_or_create_existing_user_nodes>,
+    "output": "Generated a Cypher query to check or create existing nodes of the user"
   }
 - Here you will get the result of the executed query
 - {
     "step": "ANALYZE",
-    "output": "Analyzing the results of the executed Cypher query. If the nodes for the user and Pizza Hut do not exist, I will generate a new Cypher query to create them and establish a relationship between them."
+    "output": "Analyzing the results of the executed Cypher query. User node created successfully. Now I will generate a new Cypher query to check or create a node for Pizza Hut"
   }
 - {
     "step": "TOOL_REQUEST",
-    "query": <cypher_query_to_create_user_node>,
-    "output": "Generated a Cypher query to create a new node for the user in the Neo4j database."
-  }
-- Here you will get the result of the executed query
-- {
-    "step": "ANALYZE",
-    "output": "Analyzing the results of the executed Cypher query. User node created successfully. Now I will generate a new Cypher query to create a node for Pizza Hut and establish a relationship between the user and Pizza Hut."
-  }
-- {
-    "step": "TOOL_REQUEST",
-    "query": <cypher_query_to_create_pizza_hut_node>,
-    "output": "Generated a Cypher query to create a new node for Pizza Hut."
+    "query": <cypher_query_to_check_or_create_pizza_hut_node>,
+    "output": "Generated a Cypher query to check or create a new node for Pizza Hut."
   }
 - Here you will get the result of the executed query
 - {
