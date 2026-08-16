@@ -1,6 +1,6 @@
 // internal-imports
-import { openai } from '../../core/lib/openai.js';
-import { redis } from '../../core/lib/redis.js';
+import { callOpenAI } from '../../core/lib/openai.js';
+import { getRedisKV, zaddRedisSortedSet } from '../../core/lib/redis.js';
 
 // external-imports
 import type { Request, Response } from 'express';
@@ -10,17 +10,17 @@ export const controller = {
   // @controller POST /
   chat: async (request: Request, response: Response) => {
     // get running context
-    const context = await redis.get('chat-running-context');
+    const context = await getRedisKV('chat-running-context');
 
     // generate a response from the LLM
-    const res = await openai.responses.create({
+    const res = await callOpenAI({
       model: 'gpt-4o-mini',
       instructions: `${SYSTEM_PROMPT}\nRunning Context:${context}`,
       input: request.body.query,
     });
 
     // update the chat history
-    await redis.zadd(
+    await zaddRedisSortedSet(
       'chat-history',
       Date.now(),
       JSON.stringify({ query: request.body.query, response: res.output_text })
