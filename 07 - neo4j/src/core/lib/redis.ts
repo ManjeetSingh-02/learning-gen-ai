@@ -20,6 +20,10 @@ export async function zaddRedisSortedSet(key: string, score: number, value: stri
 }
 
 // function to zrangebyscore a sorted set in redis
-export async function zrangebyscoreRedisSortedSet(key: string, min: number, max: string) {
-  return await redis.zrangebyscore(key, min, max);
+export async function zrangebyscoreRedisSortedSet(key: string, min: string, max: string) {
+  const res = await redis.zrangebyscore(key, min, max, 'WITHSCORES');
+  return Array.from({ length: res.length / 2 }, (_, i) => ({
+    value: res[i * 2],
+    score: Number(res[i * 2 + 1]),
+  }));
 }
