@@ -1,6 +1,6 @@
 // internal-imports
 import { createApp } from './app/express.js';
-import { runNeo4jSyncWorker } from './core/bg-workers/sync-neo4j.js';
+import { startNeo4jSyncWorker } from './core/bg-workers/sync-neo4j.js';
 
 // external-imports
 import http from 'http';
@@ -14,6 +14,9 @@ async function runServer(): Promise<void> {
   await new Promise<void>((resolve, reject) =>
     server.once('error', reject).once('listening', resolve).listen(process.env.PORT)
   );
+
+  // run the background workers
+  startNeo4jSyncWorker();
 }
 
 // run the server
@@ -21,6 +24,3 @@ await runServer().catch(error => {
   console.error(error);
   process.exit(1);
 });
-
-// run the background workers
-setInterval(runNeo4jSyncWorker, 60 * 1000);
