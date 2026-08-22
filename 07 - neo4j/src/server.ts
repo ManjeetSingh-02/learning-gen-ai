@@ -1,6 +1,7 @@
 // internal-imports
 import { createApp } from './app/express.js';
 import { startNeo4jSyncWorker } from './core/bg-workers/sync-neo4j.js';
+import { startUpdateContextWorker } from './core/bg-workers/update-context.js';
 
 // external-imports
 import http from 'http';
@@ -17,6 +18,7 @@ async function runServer(): Promise<void> {
 
   // run the background workers
   startNeo4jSyncWorker();
+  startUpdateContextWorker();
 }
 
 // run the server
