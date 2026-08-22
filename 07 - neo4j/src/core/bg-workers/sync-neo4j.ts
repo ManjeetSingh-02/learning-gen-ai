@@ -45,7 +45,7 @@ const SYSTEM_PROMPT = `You are an expert Neo4j Cypher query generator.
 
 INFORMATION:
 - Running Context: This is the current context of the chat. It may contain information about the user, the conversation, and any relevant data that can help you generate accurate Cypher queries.
-- Chat History: This is a list of previous messages in the chat. It may contain information about the user's questions, the assistant's responses, and any relevant data that can help you generate accurate Cypher queries. This is only of last 60 seconds of chat history as messages older than 60 seconds are already converted to Cypher queries and executed in Neo4j.
+- Chat History: This is a list of previous messages in the chat. It may contain information about the user's questions, the assistant's responses, and any relevant data that can help you generate accurate Cypher queries.
 
 TOOLS:
 - executeQuery(query: string): When you generate a TOOL_REQUEST, the application will execute the generated Cypher query against Neo4j and provide the execution result back to you as a TOOL_RESULT step. You can use this to create, read, update, or delete data in the Neo4j database.
