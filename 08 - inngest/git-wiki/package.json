@@ -1,0 +1,32 @@
+{
+  "name": "git-wiki",
+  "version": "1.0.0",
+  "main": "src/server.ts",
+  "scripts": {
+    "dev": "node --env-file=.env --import=tsx --watch src/server.ts"
+  },
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^12.5.1",
+      "onFail": "download"
+    }
+  },
+  "type": "module",
+  "dependencies": {
+    "@langchain/core": "^1.2.11",
+    "@langchain/openai": "^1.5.13",
+    "@langchain/textsplitters": "^1.0.1",
+    "@octokit/rest": "^22.0.1",
+    "@pinecone-database/pinecone": "^9.0.0",
+    "express": "^5.2.1",
+    "inngest": "^4.20.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.2",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}
